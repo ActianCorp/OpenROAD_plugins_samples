@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<OPENROAD xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<!-- Copyright (c) 2016 Actian Corporation. All Rights Reserved.-->
+	<APPLICATION name="scripted_plugins">
+		<included_apps>
+			<row>
+				<appname>core</appname>
+				<version>-1</version>
+				<imgfilename>core.plb</imgfilename>
+			</row>
+			<row_class>inclapp</row_class>
+		</included_apps>
+	</APPLICATION>
+	<COMPONENT name="PI_Initialize" xsi:type="proc4glsource">
+		<script>
+			<![CDATA[procedure PI_Initialize( editor = scintentryfield, caller = frameexec ) =
+declare
+    plugin_menu = menugroup;
+    plugin_opt = optionfield;
+    menu_item_1	= menubutton;
+    menu_item_2	= menubutton;
+enddeclare
+{
+
+    curprocedure.Trace( text = 'Called PI_initialize()' );
+    /*
+    ** Set Tab width and Indentation to 8
+    */
+    editor.CallEditor( msg = 'SCI_SETTABWIDTH', wparam = 8 );
+    editor.CallEditor( msg = 'SCI_SETINDENT', wparam = 8 );
+
+    plugin_menu = menugroup(caller.FieldByName( name  = 'plugin_menuitems' ));
+    if plugin_menu IS NULL then
+        curexec.trace( text = 'Could not find plugin_menuitems in menu' )
+    else
+	menu_item_1.FocusBehavior = FT_SETVALUE;
+	menu_item_1.DefaultString = 'PI_lowercasestring';
+	menu_item_1.TextLabel = 'Lowercase';
+	menu_item_1.CurBias = MB_ENABLED;
+	menu_item_1.ParentMenuGroup = plugin_menu;
+	
+	menu_item_2.FocusBehavior = FT_SETVALUE;
+	menu_item_2.DefaultString = 'PI_uppercasestring';
+	menu_item_2.TextLabel = 'Uppercase';
+	menu_item_1.CurBias = MB_ENABLED;	
+	menu_item_2.ParentMenuGroup = plugin_menu;
+	
+	plugin_menu.UpdMenu();
+	plugin_menu.AllBias = MB_ENABLED;
+	
+    endif;
+    
+    plugin_opt = optionfield(caller.FieldByName( name  = 'plugin_options' ));
+    if plugin_opt IS NULL then
+        curexec.trace( text = 'Could not find plugin_options in toolbar' )
+    else
+        plugin_opt.TextLabel = 'Plugins:';
+        plugin_opt.BgColor = CC_SYS_BTNFACE;
+        
+        plugin_opt.ValueList.AddItem( enumvalue = 1, textvalue = 'PI_lowercasestring',
+		displayvalue = 'Lowercase', bitmapvalue = NULL );
+        plugin_opt.ValueList.AddItem( enumvalue = 2, textvalue = 'PI_uppercasestring',
+		displayvalue = 'Uppercase', bitmapvalue = NULL );
+      
+        plugin_opt.UpdChoiceList();
+	plugin_opt.AllBias = FB_CHANGEABLE;
+    endif;
+    
+    return;
+}]]>
+		</script>
+	</COMPONENT>
+	<COMPONENT name="PI_lowercasestring" xsi:type="proc4glsource">
+		<script>
+			<![CDATA[procedure PI_lowercasestring
+(
+    editor = scintentryfield;
+    caller = frameexec;
+) =
+declare
+    str = varchar(256);
+enddeclare
+{
+    CurExec.Trace( text =  'PI_lowercasestring called' );
+    editor.CallEditor(  msg = 'SCI_GETSELTEXT', wparam = NULL, lparam = byref( str ) );
+    CurExec.trace( text = 'selected text: ' + str );
+    str = lowercase( str );
+    CurExec.trace( text = 'lowercase text: ' + str );
+    editor.CallEditor( msg = 'SCI_REPLACESEL', lparam = byref(str) );  
+}
+]]>
+		</script>
+	</COMPONENT>
+	<COMPONENT name="PI_ScriptAdded" xsi:type="proc4glsource">
+		<script>
+			<![CDATA[procedure PI_ScriptAdded( editor = scintentryfield, caller = frameexec ) =
+declare
+    so = stringobject;
+    len = integer;
+enddeclare
+{
+    curprocedure.Trace( text = 'Called PI_ScriptAdded()' );
+
+    // Take the 4GL script that was just loaded and write to a
+    // file do that we can "diff" the changes.
+    
+    len = editor.GetIntProperty( msg = 'SCI_GETLENGTH' );
+    editor.CallEditor( msg = 'SCI_GETTEXT', wparam = len, oparam = byref(so) );
+    so.WriteToFile( filename = 'c:\temp\script.before' );
+    
+    return;
+}]]>
+		</script>
+	</COMPONENT>
+	<COMPONENT name="PI_ScriptBeforeSave" xsi:type="proc4glsource">
+		<script>
+			<![CDATA[procedure PI_ScriptBeforeSave( editor = scintentryfield, caller = frameexec ) =
+declare
+
+    so_after = stringobject;
+    so_before = stringobject;
+    len = integer;
+    savetext = integer not null default 1;
+    cmd = varchar(256);
+enddeclare
+{
+
+   curprocedure.Trace( text = 'Called PI_ScriptBeforeSave()' );
+
+    /*
+    ** Retrieve the text that was originally loaded and
+    ** then saved using the PI_ScriptAdded() procedure
+    */
+    so_before.FileHandle = 'c:\temp\script.before';
+    
+    /*
+    ** Get the new text and save it
+    */
+    len = editor.GetIntProperty( msg = 'SCI_GETLENGTH' );
+    editor.CallEditor( msg = 'SCI_GETTEXT', wparam = len, oparam = byref(so_after) );
+    so_after.WriteToFile( filename = 'c:\temp\script.after' );
+
+    /*
+    ** "Diff" the before and after files and prompt the user if they
+    ** still want to save the modifications after viewing the "diffs"
+    */
+    cmd = 'windiff ' + 'c:\temp\script.before ' + 'c:\temp\script.after';
+    call system cmd;
+    
+    
+    /*
+    ** Cancel or perform the save operation
+    */
+    return savetext;
+
+}]]>
+		</script>
+		<datatype>integer</datatype>
+	</COMPONENT>
+	<COMPONENT name="PI_uppercasestring" xsi:type="proc4glsource">
+		<script>
+			<![CDATA[procedure PI_uppercasestring
+(
+  editor = scintentryfield;
+  caller = frameexec;
+) =
+declare
+    str = varchar(256);
+enddeclare
+{
+    CurExec.Trace( text =  'PI_uppercasestring called' );
+    editor.CallEditor(  msg = 'SCI_GETSELTEXT', wparam = NULL, lparam = byref( str ) );
+    CurExec.trace( text = 'selected text: ' + str );
+    str = uppercase( str );
+    CurExec.trace( text = 'uppercase text: ' + str );
+    editor.CallEditor( msg = 'SCI_REPLACESEL', lparam = byref(str) );
+}
+]]>
+		</script>
+	</COMPONENT>
+</OPENROAD>
