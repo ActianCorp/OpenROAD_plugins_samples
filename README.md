@@ -2,7 +2,7 @@
 
 ## Get Started
 
-This assums a local Ingres DBMS, a new database named `plugins` will be used.
+This assumes a local Ingres DBMS, a new database named `plugins` will be used.
 
     createdb plugins
     backupapps /reload /dbname plugins
