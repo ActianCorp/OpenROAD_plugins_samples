@@ -33,8 +33,10 @@ for implementing 3 plugin procedures and frames:
 
 	a)  PI_lowercasestring():
 	    A procedure that converts the currently selected script text to lowercase characters.
+	    
 	b)  PI_uppercasestring():
 	    A procedure that converts the currently selected script text to uppercase characters.
+	    
 	c)  selectindentation():
 	    A frame that allows the user to specify the number of spaces associated with the
 	    Tab key and whether Tabs themselves consist of Space characters.
