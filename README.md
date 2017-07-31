@@ -41,13 +41,13 @@ for implementing 3 plugin procedures and frames:
 	    A frame that allows the user to specify the number of spaces associated with the
 	    Tab key and whether Tabs themselves consist of Space characters.
 
-The PI_Initialize() 4GL procedure adds the above named procedures into the predefined "plugin_menuitems"
-MenuGroup. The PI_Initialize() script then changes the MenuGroup's label to "Options" after adding the
-procedures and frames.
+	The PI_Initialize() 4GL procedure adds the above named procedures into the predefined "plugin_menuitems"
+	MenuGroup. The PI_Initialize() script then changes the MenuGroup's label to "Options" after adding the
+	procedures and frames.
 
-The PI_Initialize procedure also enables an OptionField with the predefined name "plugin_options", adds the
-PI_lowercasestring() and PI_uppercasestring() procedures to the OptionField and changes the OptionField's
-text label to "Options:"
+	The PI_Initialize procedure also enables an OptionField with the predefined name "plugin_options", adds the
+	PI_lowercasestring() and PI_uppercasestring() procedures to the OptionField and changes the OptionField's
+	text label to "Options:"
 
 2)	PI_ScriptAdded() -
 The name of the procedure that is run after the 4GL script itself is initially loaded into the script
