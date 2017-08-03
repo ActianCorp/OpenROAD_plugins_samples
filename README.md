@@ -7,6 +7,7 @@ This assumes a local Ingres DBMS, a new database named `plugins` will be used.
     createdb plugins
     backupapps /reload /dbname plugins
     w4gldev makeimage plugins scripted_plugins scripted_plugins.plb -f -e -w -Tall
+    copy scripted_plugins.plb %II_W4GLAPPS_SYS%
 
 NOTE this loads all applications found in the current directory.
 
